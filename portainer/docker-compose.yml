@@ -19,15 +19,18 @@ services:
               ports:
                      - 9999:80
          wildfly:
-              image: bitnami/wildfly
+              image: jboss/wildfly
               container_name: wildfly_pri
               volumes:
+                     - /var/run/docker.sock:/var/run/docker.sock
                      - /home/turboscript/shared/Docker/vid-tuts/portainer/wildfly:/home
+              command: bash wildfly_install_final.sh
               ports:
                      - 9998:8080
                      - 9990:9990
               environment:
-                     - WILDFLY_PASSWORD=password                  
+                     - WILDFLY_PASSWORD=password
+              restart: unless-stopped                  
          jenkins:
               image: jenkins/jenkins:lts-jdk11
               privileged: true
