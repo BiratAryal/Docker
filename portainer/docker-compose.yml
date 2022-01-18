@@ -1,64 +1,60 @@
 version: '3.7'
 
+networks:
+       test:
+              driver: bridge
+              ipam:
+                     driver: default
+                     config:
+                     - subnet: 172.168.10.0/24
+                       gateway: 172.168.10.1
 services:
-         portainer:
+       portainer:
               image: portainer/portainer
               container_name: portainer
               volumes:
                      - /var/run/docker.sock:/var/run/docker.sock
                      - /home/turboscript/shared/Docker/vid-tuts/portrainer:/data
+              networks:
+                     test:
+                        ipv4_address: 172.168.10.254
               ports:
                      - 8000:8000
                      - 9000:9000
               restart: always
-         nginx:
-              image: nginx
+       nginx:
+              build: /home/turboscript/shared/Docker/vid-tuts/nginx
               container_name: nginx
               volumes:
                      - /home/turboscript/shared/Docker/vid-tuts/portainer/nginx/:/usr/share/nginx/html
               ports:
                      - 9999:80
-         wildfly:
-              image: jboss/wildfly
-              container_name: wildfly_pri
-              volumes:
-                     - /var/run/docker.sock:/var/run/docker.sock
-                     - /home/turboscript/shared/Docker/vid-tuts/portainer/wildfly:/home
-              command: bash wildfly_install_final.sh
-              ports:
-                     - 9998:8080
-                     - 9990:9990
-              environment:
-                     - WILDFLY_PASSWORD=password
-              restart: unless-stopped                  
-         jenkins:
-              image: jenkins/jenkins:lts-jdk11
-              privileged: true
-              user: root
-              container_name: jenkins
-              volumes:
-                     - /home/turboscript/shared/Docker/vid-tuts/Jenkins/jenkins_home:/var/jenkins_home
-                     - /var/run/docker.sock:/var/run/docker.sock
-                     - /usr/local/bin/docker:/usr/local/bin/docker
-              ports:
-                     - 9997:8080
-                     - 50000:50000
-       #   sql-server-db:
-       #        container_name: sql-server-database
-       #        image: mcr.microsoft.com/mssql/server:2019-latest
+              networks:
+                     test:
+                        ipv4_address: 172.168.10.2
+              restart: always
+       #   wildfly:
+       #        image: jboss/wildfly
+       #        container_name: wildfly_pri
+       #        volumes:
+       #               - /var/run/docker.sock:/var/run/docker.sock
+       #               - /home/turboscript/shared/Docker/vid-tuts/portainer/wildfly:/home
+       #        command: bash wildfly_install_final.sh
        #        ports:
-       #               - "1433:1433"
+       #               - 9998:8080
+       #               - 9990:9990
        #        environment:
-       #               SA_PASSWORD: "t35t@BIRU"
-       #               ACCEPT_EULA: "Y"
-       #        # volumes:
-       #        #        - /home/turboscript/shared/Docker/vid-tuts/sql-server:
-       #        restart: unless-stopped
-         nagios:
-              image: jasonrivers/nagios:latest
-              container_name: nagios
-              volumes:
-                     - /home/turboscript/shared/Docker/vid-tuts/portainer/nagios:/opt/nagios/etc
-              ports:
-                     - 9996:80
-              restart: unless-stopped
+       #               - WILDFLY_PASSWORD=password
+       #        restart: unless-stopped                  
+       #   jenkins:
+       #        image: jenkins/jenkins:lts-jdk11
+       #        privileged: true
+       #        user: root
+       #        container_name: jenkins
+       #        volumes:
+       #               - /home/turboscript/shared/Docker/vid-tuts/Jenkins/jenkins_home:/var/jenkins_home
+       #               - /var/run/docker.sock:/var/run/docker.sock
+       #               - /usr/local/bin/docker:/usr/local/bin/docker
+       #        ports:
+       #               - 9997:8080
+       #               - 50000:50000
