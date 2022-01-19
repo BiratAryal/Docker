@@ -1,7 +1,6 @@
 FROM scratch 
 MAINTAINER Birat Aryal
 ADD centos-7-x86_64-docker.tar.xz /
-COPY centos-7-x86_64-docker.tar.xz /home
 LABEL \
     org.label-schema.schema-version="1.0" \
     org.label-schema.name="CentOS Base Image" \

@@ -1,7 +1,7 @@
 #  Install "Development Tools" and Vim editor:
-yum groupinstall -y 'Development Tools' && yum install -y vim wget tar net-tools
+yum groupinstall -y 'Development Tools'
 #  Install Extra Packages for Enterprise Linux (EPEL):
-yum install -y epel-release
+yum install -y epel-release vim wget tar net-tools
 # • Download and install optional NGINX dependencies:
 yum install -y perl perl-devel perl-ExtUtils-Embed libxslt libxslt-devel libxml2 libxml2-devel gd gd-devel GeoIP GeoIP-devel
 # • Download the latest mainline version of NGINX source code and extract it:
