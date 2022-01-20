@@ -9,6 +9,7 @@ wget https://nginx.org/download/nginx-1.20.0.tar.gz && tar zxvf nginx-1.20.0.tar
 
 # • Download third party module from git:
 # got to home/tms directory then 
+mkdir -p /home/tms
 cd /home/tms/
 git clone https://github.com/openresty/headers-more-nginx-module.git
 # • Download the NGINX dependencies source code and extract them:
@@ -33,7 +34,7 @@ cp /nginx-1.20.0/man/nginx.8 /usr/share/man/man8
 gzip /usr/share/man/man8/nginx.8
 # Check that Man page for NGINX is working
 man nginx
-• Configure, compile, and install NGINX:
+# • Configure, compile, and install NGINX:
 ./configure --prefix=/etc/nginx \
             --sbin-path=/usr/sbin/nginx \
             --modules-path=/usr/lib64/nginx/modules \
@@ -107,7 +108,7 @@ useradd --system --home /var/cache/nginx --shell /sbin/nologin --comment "nginx 
 # • Check syntax and potential errors:
 nginx -t
 
-ERROR 1:
+# ERROR 1:
 # #If this error is thrown:
 # nginx: [emerg] module "/usr/lib64/nginx/modules/ngx_http_perl_module.so" version 1016001 instead of 1020000 in /usr/share/nginx/modules/mod-http-perl.conf:1
 # nginx: configuration file /etc/nginx/nginx.conf test failed
@@ -120,7 +121,6 @@ ERROR 1:
 # nginx: [emerg] mkdir() "/var/cache/nginx/client_temp" failed (2: No such file or directory)
 # nginx: configuration file /etc/nginx/nginx.conf test failed
 # Just create directory
-mkdir -p /var/cache/nginx && nginx -t
 # • Create a systemd unit file for nginx:
 # vim /usr/lib/systemd/system/nginx.service
 
@@ -154,10 +154,4 @@ mkdir -p /var/cache/nginx && nginx -t
 # ps aux | grep nginx
 # curl -I 127.0.0.1
 
-
-
-# • Remove archaive files from the /etc/nginx directory:
-rm /etc/nginx/koi-utf /etc/nginx/koi-win /etc/nginx/win-utf
-
-• Remove all .default backup files from /etc/nginx/:
-rm /etc/nginx/*.default
+echo "daemon off;" >> /etc/nginx/nginx.conf
