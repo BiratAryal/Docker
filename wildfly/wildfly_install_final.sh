@@ -67,7 +67,7 @@ complete_install(){
         cp $INSTALL_DIR$PACKAGE/docs/contrib/scripts/systemd/$PACKAGE.service /etc/systemd/system/;
 
         # Notify systemd that we created a new unit file:
-        systemctl daemon-reload;
+        # systemctl daemon-reload;
         
         #Changing mode to access administrative console
         read -p "Enter Initial Heap size: " initial_heap_size
@@ -84,8 +84,8 @@ complete_install(){
         # defining size of heap memory initial to max can use G, maxmetaspace should always be half of max_heap_size 
         sed -i '55 i \   \JAVA_OPTS="-Xms'$initial_heap_size' -Xmx'$max_heap_size' -XX:MetaspaceSize=256M -XX:MaxMetaspaceSize=1G -Djava.net.preferIPv4Stack=true -XX:NativeMemoryTracking=summary -Djboss.remoting.pooled-buffers=false -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=$JDK_HEAP_DUMP_PATH -XX:+UseStringDeduplication"'
         # Start the WildFly service an enable it to be automatically started at boot time by running:
-        systemctl start $PACKAGE;
-        systemctl enable $PACKAGE;
+        # systemctl start $PACKAGE;
+        # systemctl enable $PACKAGE;
 
         # setup firewall rule for wildfly
         firewall-cmd --zone=public --permanent --add-port=8080/tcp
