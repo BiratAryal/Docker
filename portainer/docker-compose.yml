@@ -1,38 +1,38 @@
 version: '3.7'
 
-networks:
-       test:
+networks: #create custom network as per requirement
+       test: #name of network
               driver: bridge
               ipam:
                      driver: default
                      config:
                      - subnet: 172.168.10.0/24
                        gateway: 172.168.10.1
-services:
-       portainer:
-              image: portainer/portainer
-              container_name: portainer
+services: #define services or container that you want to build.
+       portainer: #name of service that you want to install 
+              image: portainer/portainer:latest #pull image from docker hub of latest version
+              container_name: portainer #Define name of container
               volumes:
                      - /var/run/docker.sock:/var/run/docker.sock
                      - /home/turboscript/shared/Docker/vid-tuts/portrainer:/data
-              networks:
-                     test:
+              networks: #define network which was created at top
+                     test: #name of network
                         ipv4_address: 172.168.10.254
               ports:
                      - 8000:8000
                      - 9000:9000
-              restart: always
+              restart: always #if host os is restarted then container also restarts itself.
        nginx:
-              build: /home/turboscript/shared/Docker/vid-tuts/nginx
-              container_name: nginx
-              volumes:
-                     - /home/turboscript/shared/Docker/vid-tuts/portainer/nginx/:/usr/share/nginx/html
+              image: turboscript/nginx:01 #docker file present in this directory and builds from there.
+              container_name: nginx #defines name of container
+              volumes: #using bind-mount all files in directroy nginx is mounted to html
+                     - nginx_home1:/usr/share/nginx/html
               ports:
-                     - 9999:80
+                     - 9999:80 #host port is 9999 and port of container is 80
               networks:
                      test:
                         ipv4_address: 172.168.10.2
-              restart: always
+              restart: unless-stopped 
        #   wildfly:
        #        image: jboss/wildfly
        #        container_name: wildfly_pri
@@ -46,15 +46,25 @@ services:
        #        environment:
        #               - WILDFLY_PASSWORD=password
        #        restart: unless-stopped                  
-       #   jenkins:
-       #        image: jenkins/jenkins:lts-jdk11
-       #        privileged: true
-       #        user: root
-       #        container_name: jenkins
-       #        volumes:
-       #               - /home/turboscript/shared/Docker/vid-tuts/Jenkins/jenkins_home:/var/jenkins_home
-       #               - /var/run/docker.sock:/var/run/docker.sock
-       #               - /usr/local/bin/docker:/usr/local/bin/docker
-       #        ports:
-       #               - 9997:8080
-       #               - 50000:50000
+       jenkins:
+              image: jenkins/jenkins:lts-jdk11
+              privileged: true
+              user: root
+              container_name: jenkins
+              volumes:
+                     - /home/turboscript/shared/Docker/vid-tuts/Jenkins/jenkins_home:/var/jenkins_home
+                     - /var/run/docker.sock:/var/run/docker.sock
+                     - /usr/local/bin/docker:/usr/local/bin/docker
+              ports:
+                     - 9997:8080
+                     - 50000:50000
+
+volumes:
+       jenkins_home1:
+       nginx_home1:
+              driver: local
+              driver_opts:
+                     o: bind
+                     type: none
+                     device: /mnt/hgfs/Docker/vid-tuts/nginx/
+       portainer_home:
