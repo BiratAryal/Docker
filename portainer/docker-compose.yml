@@ -1,5 +1,9 @@
 version: '3.7'
 
+# *******************************************************************************************************
+#                                  Network Defination
+# *******************************************************************************************************
+
 networks: #create custom network as per requirement
        test: #name of network
               driver: bridge
@@ -8,6 +12,23 @@ networks: #create custom network as per requirement
                      config:
                      - subnet: 172.168.10.0/24
                        gateway: 172.168.10.1
+       monitoring:
+              driver: bridge
+
+# *******************************************************************************************************
+#                                  Volume defination
+# *******************************************************************************************************
+
+volumes:
+       jenkins_home1:
+       nginx_home1:
+       portainer_home:
+       prometheus_data: {}
+
+# *******************************************************************************************************
+#                                  Main Services Defination Starts
+# *******************************************************************************************************
+
 services: #define services or container that you want to build.
        portainer: #name of service that you want to install 
               image: portainer/portainer:latest #pull image from docker hub of latest version
@@ -22,49 +43,108 @@ services: #define services or container that you want to build.
                      - 8000:8000
                      - 9000:9000
               restart: always #if host os is restarted then container also restarts itself.
+# =======================================================================================================
+#                                  Nginx Section
+# =======================================================================================================
+
        nginx:
-              image: turboscript/nginx:01 #docker file present in this directory and builds from there.
+              image: turboscript/nginx:03 #docker file present in this directory and builds from there.
               container_name: nginx #defines name of container
+              user: nginx # run as nginx user
+              command: nginx
               volumes: #using bind-mount all files in directroy nginx is mounted to html
-                     - nginx_home1:/usr/share/nginx/html
+                     - nginx_home1:/etc/nginx/html
+                     # - /home/turboscript/shared/Docker/vid-tuts/nginx:/etc/nginx/html
               ports:
                      - 9999:80 #host port is 9999 and port of container is 80
               networks:
                      test:
                         ipv4_address: 172.168.10.2
-              restart: unless-stopped 
-       #   wildfly:
-       #        image: jboss/wildfly
-       #        container_name: wildfly_pri
-       #        volumes:
-       #               - /var/run/docker.sock:/var/run/docker.sock
-       #               - /home/turboscript/shared/Docker/vid-tuts/portainer/wildfly:/home
-       #        command: bash wildfly_install_final.sh
-       #        ports:
-       #               - 9998:8080
-       #               - 9990:9990
-       #        environment:
-       #               - WILDFLY_PASSWORD=password
-       #        restart: unless-stopped                  
+
+# =====================================================================================================
+#                                  Wildfly Section
+# =====================================================================================================
+       
+       wildfly:
+              image: jboss/wildfly
+              container_name: wildfly_pri
+              volumes:
+                     - /var/run/docker.sock:/var/run/docker.sock
+                     - /home/turboscript/shared/Docker/vid-tuts/portainer/wildfly:/home
+              command: bash wildfly_install_final.sh
+              ports:
+                     - 9998:8080
+                     - 9990:9990
+              environment:
+                     - WILDFLY_PASSWORD=password
+              restart: unless-stopped   
+
+# =======================================================================================================
+#                                  Jenkins Section
+# =======================================================================================================
+
        jenkins:
               image: jenkins/jenkins:lts-jdk11
               privileged: true
               user: root
               container_name: jenkins
               volumes:
-                     - /home/turboscript/shared/Docker/vid-tuts/Jenkins/jenkins_home:/var/jenkins_home
+                     - jenkins_home1:/var/jenkins_home
                      - /var/run/docker.sock:/var/run/docker.sock
                      - /usr/local/bin/docker:/usr/local/bin/docker
               ports:
                      - 9997:8080
                      - 50000:50000
 
-volumes:
-       jenkins_home1:
-       nginx_home1:
-              driver: local
-              driver_opts:
-                     o: bind
-                     type: none
-                     device: /mnt/hgfs/Docker/vid-tuts/nginx/
-       portainer_home:
+# =======================================================================================================
+#                                  Rancher (tested once)
+# =======================================================================================================
+       rancher:
+              image: rancher/rancher
+              privileged: true
+              container_name: rancher
+              volumes:
+                     - /home/turboscript/Shared/Only-Docker/rancher:/var/lib/rancher
+              ports:
+                     - 9996:80
+                     - 9997:443
+              restart: unless-stopped
+# =======================================================================================================
+#                                Prometheus Monitoring (test-phase)
+# =======================================================================================================
+
+       node-exporter:
+              image: prom/node-exporter:latest
+              container_name: node-exporter
+              restart: unless-stopped
+              volumes:
+                     - /proc:/host/proc:ro
+                     - /sys:/host/sys:ro
+                     - /:/rootfs:ro
+              command:
+                     - '--path.procfs=/host/proc'
+                     - '--path.rootfs=/rootfs'
+                     - '--path.sysfs=/host/sys'
+                     - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+              expose:
+                     - 9100
+              networks:
+                     - monitoring
+
+       prometheus:
+              image: prom/prometheus:latest
+              container_name: prometheus
+              restart: unless-stopped
+              volumes:
+                     - ./prometheus.yml:/etc/prometheus/prometheus.yml
+                     - prometheus_data:/prometheus
+              command:
+                     - '--config.file=/etc/prometheus/prometheus.yml'
+                     - '--storage.tsdb.path=/prometheus'
+                     - '--web.console.libraries=/etc/prometheus/console_libraries'
+                     - '--web.console.templates=/etc/prometheus/consoles'
+                     - '--web.enable-lifecycle'
+              expose:
+                     - 9090
+              networks:
+                     - monitoring
