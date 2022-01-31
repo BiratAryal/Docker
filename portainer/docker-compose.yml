@@ -20,10 +20,10 @@ networks: #create custom network as per requirement
 # *******************************************************************************************************
 
 volumes:
-       jenkins_home1:
-       nginx_home1:
-       portainer_home:
-       prometheus_data: {}
+       jenkins_home:
+       nginx_home:
+       portainer_data:
+       # prometheus_data: {}
 
 # *******************************************************************************************************
 #                                  Main Services Defination Starts
@@ -35,7 +35,8 @@ services: #define services or container that you want to build.
               container_name: portainer #Define name of container
               volumes:
                      - /var/run/docker.sock:/var/run/docker.sock
-                     - /home/turboscript/shared/Docker/vid-tuts/portrainer:/data
+                     - portainer_data:/data
+                     # - /home/turboscript/Containers/Primary/Portainer/portainer_data:/data
               networks: #define network which was created at top
                      test: #name of network
                         ipv4_address: 172.168.10.254
@@ -48,12 +49,11 @@ services: #define services or container that you want to build.
 # =======================================================================================================
 
        nginx:
-              image: turboscript/nginx:03 #docker file present in this directory and builds from there.
+              image: turboscript/nginx:04 #docker file present in this directory and builds from there.
               container_name: nginx #defines name of container
               user: nginx # run as nginx user
-              command: nginx
               volumes: #using bind-mount all files in directroy nginx is mounted to html
-                     - nginx_home1:/etc/nginx/html
+                     - nginx_home1:/etc/nginx/html:rw
                      # - /home/turboscript/shared/Docker/vid-tuts/nginx:/etc/nginx/html
               ports:
                      - 9999:80 #host port is 9999 and port of container is 80
@@ -65,19 +65,19 @@ services: #define services or container that you want to build.
 #                                  Wildfly Section
 # =====================================================================================================
        
-       wildfly:
-              image: jboss/wildfly
-              container_name: wildfly_pri
-              volumes:
-                     - /var/run/docker.sock:/var/run/docker.sock
-                     - /home/turboscript/shared/Docker/vid-tuts/portainer/wildfly:/home
-              command: bash wildfly_install_final.sh
-              ports:
-                     - 9998:8080
-                     - 9990:9990
-              environment:
-                     - WILDFLY_PASSWORD=password
-              restart: unless-stopped   
+       # wildfly:
+       #        image: jboss/wildfly
+       #        container_name: wildfly_pri
+       #        volumes:
+       #               - /var/run/docker.sock:/var/run/docker.sock
+       #               - /home/turboscript/shared/Docker/vid-tuts/portainer/wildfly:/home
+       #        command: bash wildfly_install_final.sh
+       #        ports:
+       #               - 9998:8080
+       #               - 9990:9990
+       #        environment:
+       #               - WILDFLY_PASSWORD=password
+       #        restart: unless-stopped   
 
 # =======================================================================================================
 #                                  Jenkins Section
@@ -99,52 +99,54 @@ services: #define services or container that you want to build.
 # =======================================================================================================
 #                                  Rancher (tested once)
 # =======================================================================================================
-       rancher:
-              image: rancher/rancher
-              privileged: true
-              container_name: rancher
-              volumes:
-                     - /home/turboscript/Shared/Only-Docker/rancher:/var/lib/rancher
-              ports:
-                     - 9996:80
-                     - 9997:443
-              restart: unless-stopped
+
+       # rancher:
+       #        image: rancher/rancher
+       #        privileged: true
+       #        container_name: rancher
+       #        volumes:
+       #               - /home/turboscript/Shared/Only-Docker/rancher:/var/lib/rancher
+       #        ports:
+       #               - 9996:80
+       #               - 9997:443
+       #        restart: unless-stopped
+
 # =======================================================================================================
 #                                Prometheus Monitoring (test-phase)
 # =======================================================================================================
 
-       node-exporter:
-              image: prom/node-exporter:latest
-              container_name: node-exporter
-              restart: unless-stopped
-              volumes:
-                     - /proc:/host/proc:ro
-                     - /sys:/host/sys:ro
-                     - /:/rootfs:ro
-              command:
-                     - '--path.procfs=/host/proc'
-                     - '--path.rootfs=/rootfs'
-                     - '--path.sysfs=/host/sys'
-                     - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
-              expose:
-                     - 9100
-              networks:
-                     - monitoring
+       # node-exporter:
+       #        image: prom/node-exporter:latest
+       #        container_name: node-exporter
+       #        restart: unless-stopped
+       #        volumes:
+       #               - /proc:/host/proc:ro
+       #               - /sys:/host/sys:ro
+       #               - /:/rootfs:ro
+       #        command:
+       #               - '--path.procfs=/host/proc'
+       #               - '--path.rootfs=/rootfs'
+       #               - '--path.sysfs=/host/sys'
+       #               - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+       #        expose:
+       #               - 9100
+       #        networks:
+       #               - monitoring
 
-       prometheus:
-              image: prom/prometheus:latest
-              container_name: prometheus
-              restart: unless-stopped
-              volumes:
-                     - ./prometheus.yml:/etc/prometheus/prometheus.yml
-                     - prometheus_data:/prometheus
-              command:
-                     - '--config.file=/etc/prometheus/prometheus.yml'
-                     - '--storage.tsdb.path=/prometheus'
-                     - '--web.console.libraries=/etc/prometheus/console_libraries'
-                     - '--web.console.templates=/etc/prometheus/consoles'
-                     - '--web.enable-lifecycle'
-              expose:
-                     - 9090
-              networks:
-                     - monitoring
+       # prometheus:
+       #        image: prom/prometheus:latest
+       #        container_name: prometheus
+       #        restart: unless-stopped
+       #        volumes:
+       #               - ./prometheus.yml:/etc/prometheus/prometheus.yml
+       #               - prometheus_data:/prometheus
+       #        command:
+       #               - '--config.file=/etc/prometheus/prometheus.yml'
+       #               - '--storage.tsdb.path=/prometheus'
+       #               - '--web.console.libraries=/etc/prometheus/console_libraries'
+       #               - '--web.console.templates=/etc/prometheus/consoles'
+       #               - '--web.enable-lifecycle'
+       #        expose:
+       #               - 9090
+       #        networks:
+       #               - monitoring
