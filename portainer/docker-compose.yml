@@ -49,22 +49,34 @@ services: #define services or container that you want to build.
 # =======================================================================================================
 
        nginx:
-              image: turboscript/nginx:04 #docker file present in this directory and builds from there.
+              build: /home/turboscript/Containers/Primary/Nginx
+              # image: turboscript/nginx:04 #docker file present in this directory and builds from there.
               container_name: nginx #defines name of container
-              user: nginx # run as nginx user
               volumes: #using bind-mount all files in directroy nginx is mounted to html
-                     - nginx_home1:/etc/nginx/html:rw
+                     - /home/turboscript/Containers/Primary/Nginx/html:/etc/nginx/html:rw
+                     - nginx_home:/etc/nginx/:rw
                      # - /home/turboscript/shared/Docker/vid-tuts/nginx:/etc/nginx/html
               ports:
                      - 9999:80 #host port is 9999 and port of container is 80
               networks:
                      test:
                         ipv4_address: 172.168.10.2
-
+       nginx2:
+              build: /home/turboscript/Containers/Primary/Nginx
+              # image: turboscript/nginx:04 #docker file present in this directory and builds from there.
+              container_name: nginx2 #defines name of container
+              volumes: #using bind-mount all files in directroy nginx is mounted to html
+                     - /home/turboscript/Containers/Primary/Nginx/html:/etc/nginx/html:rw
+                     - nginx_home:/etc/nginx/:rw
+                     # - /home/turboscript/shared/Docker/vid-tuts/nginx:/etc/nginx/html
+              ports:
+                     - 9998:80 #host port is 9999 and port of container is 80
+              networks:
+                     test:
+                        ipv4_address: 172.168.10.3
 # =====================================================================================================
 #                                  Wildfly Section
-# =====================================================================================================
-       
+# =====================================================================================================      
        # wildfly:
        #        image: jboss/wildfly
        #        container_name: wildfly_pri
@@ -82,24 +94,24 @@ services: #define services or container that you want to build.
 # =======================================================================================================
 #                                  Jenkins Section
 # =======================================================================================================
-
        jenkins:
               image: jenkins/jenkins:lts-jdk11
               privileged: true
               user: root
               container_name: jenkins
               volumes:
-                     - jenkins_home1:/var/jenkins_home
+                     - jenkins_home:/var/jenkins_home
                      - /var/run/docker.sock:/var/run/docker.sock
                      - /usr/local/bin/docker:/usr/local/bin/docker
               ports:
                      - 9997:8080
                      - 50000:50000
-
+              networks:
+                     test:
+                        ipv4_address: 172.168.10.4
 # =======================================================================================================
 #                                  Rancher (tested once)
 # =======================================================================================================
-
        # rancher:
        #        image: rancher/rancher
        #        privileged: true
@@ -114,7 +126,6 @@ services: #define services or container that you want to build.
 # =======================================================================================================
 #                                Prometheus Monitoring (test-phase)
 # =======================================================================================================
-
        # node-exporter:
        #        image: prom/node-exporter:latest
        #        container_name: node-exporter
@@ -132,7 +143,6 @@ services: #define services or container that you want to build.
        #               - 9100
        #        networks:
        #               - monitoring
-
        # prometheus:
        #        image: prom/prometheus:latest
        #        container_name: prometheus
