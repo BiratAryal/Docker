@@ -6,27 +6,21 @@ version: '3.7'
 
 networks: #create custom network as per requirement
        test: #name of network
-              # driver: bridge
-              # ipam:
-                     # driver: default
-                     # config:
-                     # - subnet: 172.168.10.0/24
-                     #   gateway: 172.168.10.1
+              driver: bridge
+              ipam:
+                     driver: default
+                     config:
+                     - subnet: 172.168.10.0/24
+                       gateway: 172.168.10.1
        monitoring:
-              # driver: bridge
-              # ipam:
-                     # driver: default
-                     # config:
-                     # - subnet: 172.168.20.0/24
-                     #   gateway: 172.168.20.1
+              driver: bridge
 
 # *******************************************************************************************************
 #                                  Volume defination
 # *******************************************************************************************************
 
 volumes:
-       portainer_jenkins_home:
-              external: true
+       jenkins_home:
        nginx_home:
        portainer_data:
        # prometheus_data: {}
@@ -38,25 +32,14 @@ volumes:
 services: #define services or container that you want to build.
        portainer: #name of service that you want to install 
               image: portainer/portainer:latest #pull image from docker hub of latest version
-              # container_name: portainer #Define name of container
+              container_name: portainer #Define name of container
               volumes:
                      - /var/run/docker.sock:/var/run/docker.sock
                      - portainer_data:/data
                      # - /home/turboscript/Containers/Primary/Portainer/portainer_data:/data
               networks: #define network which was created at top
-                     # test: #name of network
-                     #    ipv4_address: 172.168.10.254
-                     monitoring:
-                     #      ipv4_address: 172.168.20.254
-              deploy:
-                     replicas: 2
-                     # sources: 
-                            # limits:
-                                   # cpus: "0.1"
-                                   # memory: 50M
-                     restart_policy:
-                            max_attempts: 2
-                            condition: on-failure
+                     test: #name of network
+                        ipv4_address: 172.168.10.254
               ports:
                      - 8000:8000
                      - 9000:9000
@@ -66,55 +49,31 @@ services: #define services or container that you want to build.
 # =======================================================================================================
 
        nginx:
-              build:
-                     context: /home/turboscript/Containers/Primary/Nginx
-                     dockerfile: Dockerfile
-              image: nginx:v1
+              build: /home/turboscript/Containers/Primary/Nginx
               # image: turboscript/nginx:04 #docker file present in this directory and builds from there.
-              # container_name: nginx #defines name of container
+              container_name: nginx #defines name of container
               volumes: #using bind-mount all files in directroy nginx is mounted to html
-                     # - /home/turboscript/Containers/Primary/Nginx/html:/etc/nginx/html:rw
+                     - /home/turboscript/Containers/Primary/Nginx/html:/etc/nginx/html:rw
                      - nginx_home:/etc/nginx/:rw
                      # - /home/turboscript/shared/Docker/vid-tuts/nginx:/etc/nginx/html
               ports:
                      - 9999:80 #host port is 9999 and port of container is 80
               networks:
                      test:
-                     #    ipv4_address: 172.168.10.2
-              restart: always
-              deploy:
-                     replicas: 3
-                     restart_policy: 
-                            max_attempts: 2
-                            condition: on-failure
-                     update_config:
-                            parallelism: 3
-                            delay: 10s
+                        ipv4_address: 172.168.10.2
        nginx2:
-              build:
-                     context: /home/turboscript/Containers/Primary/Nginx
-                     dockerfile: Dockerfile
-              image: nginx2:v1
+              build: /home/turboscript/Containers/Primary/Nginx
               # image: turboscript/nginx:04 #docker file present in this directory and builds from there.
-              # container_name: nginx2 #defines name of container
+              container_name: nginx2 #defines name of container
               volumes: #using bind-mount all files in directroy nginx is mounted to html
-                     # - /home/turboscript/Containers/Primary/Nginx/html:/etc/nginx/html:rw
+                     - /home/turboscript/Containers/Primary/Nginx/html:/etc/nginx/html:rw
                      - nginx_home:/etc/nginx/:rw
                      # - /home/turboscript/shared/Docker/vid-tuts/nginx:/etc/nginx/html
               ports:
                      - 9998:80 #host port is 9999 and port of container is 80
               networks:
                      test:
-                     #    ipv4_address: 172.168.10.3
-              restart: always
-              deploy:
-                     replicas: 3
-                     restart_policy: 
-                            max_attempts: 2
-                            condition: on-failure
-                     update_config:
-                            parallelism: 3
-                            delay: 10s
+                        ipv4_address: 172.168.10.3
 # =====================================================================================================
 #                                  Wildfly Section
 # =====================================================================================================      
@@ -136,12 +95,12 @@ services: #define services or container that you want to build.
 #                                  Jenkins Section
 # =======================================================================================================
        jenkins:
-              image: jenkins/jenkins:lts-jdk11
+              build: /home/turboscript/Containers/Primary/Jenkins
               privileged: true
               user: root
-              # container_name: jenkins
+              container_name: jenkins
               volumes:
-                     - portainer_jenkins_home:/var/jenkins_home
+                     - jenkins_home:/var/jenkins_home
                      - /var/run/docker.sock:/var/run/docker.sock
                      - /usr/local/bin/docker:/usr/local/bin/docker
               ports:
@@ -149,18 +108,7 @@ services: #define services or container that you want to build.
                      - 50000:50000
               networks:
                      test:
-                     #    ipv4_address: 172.168.10.4
-                     monitoring:
-                     #    ipv4_address: 172.168.20.253
-              restart: always
-              deploy:
-                     replicas: 2
-                     restart_policy: 
-                            max_attempts: 2
-                            condition: on-failure
-                     update_config:
-                            parallelism: 3
-                            delay: 10s
+                        ipv4_address: 172.168.10.4
 # =======================================================================================================
 #                                  Rancher (tested once)
 # =======================================================================================================

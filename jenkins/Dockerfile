@@ -1,2 +1,1 @@
-FROM centos7baseimage:0.0.1
-
+FROM jenkins/jenkins:lts-jdk11
