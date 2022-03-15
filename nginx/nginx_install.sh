@@ -154,4 +154,4 @@ nginx -t
 # ps aux | grep nginx
 # curl -I 127.0.0.1
 
-echo "daemon off;" >> /etc/nginx/nginx.conf
+# echo "daemon off;" >> /etc/nginx/nginx.conf
