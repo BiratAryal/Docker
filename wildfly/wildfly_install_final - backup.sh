@@ -123,8 +123,18 @@ tar_not_present(){
 }
 
 group_check(){
+        if [ "$GROUPNAME" == "$PACKAGE" ]; then
+                echo -e "Group exists proceeding with this group $PACKAGE \n"
+        else
                 groupadd -r $PACKAGE
-                useradd -r -g $PACKAGE -d $INSTALL_DIR$PACKAGE -s /sbin/nologin $PACKAGE
+                if [ "$USER_NAME" == "$PACKAGE" ]; then
+                        echo -e "*********User exists proceeding with this user $PACKAGE********* \n"
+                else 
+                # created user with username wildfly -g is used to define group name and -d is used to define 
+                # the home directory -s to give shell to the user.
+                        useradd -r -g $PACKAGE -d $INSTALL_DIR$PACKAGE -s /sbin/nologin $PACKAGE
+                fi
+        fi
 }
 # ******************************* function declaration end *******************************************************
 # ----------------------------------------------------------------------------------------------------------------

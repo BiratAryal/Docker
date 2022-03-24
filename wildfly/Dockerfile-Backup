@@ -1,0 +1,10 @@
+From turboscript/centos7:A2
+
+MAINTAINER Birat Aryal
+WORKDIR /
+ADD wildfly_install_final.sh /
+
+EXPOSE 8080
+EXPOSE 9990
+
+#CMD [ "/usr/bin/bash", "/wildfly_install_final.sh" ]

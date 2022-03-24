@@ -1,7 +1,6 @@
-From turboscript/centos7:A1
+From turboscript/wildfly-web:01
 
 MAINTAINER Birat Aryal
 
-ADD wildfly_install_final.sh /
-
-EXPOSE 9000
+# CMD ["/opt/wildfly/bin/standalone.sh", "-c", "/opt/wildfly/standalone/configuration/standalone.xml"]
+CMD ["/opt/wildfly/bin/standalone.sh"]
