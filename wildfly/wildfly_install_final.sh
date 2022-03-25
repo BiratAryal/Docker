@@ -70,8 +70,8 @@ complete_install(){
         # systemctl daemon-reload;
         
         #Changing mode to access administrative console
-        read -p "Enter Initial Heap size: " initial_heap_size
-        read -p "Enter Max Heap size: " max_heap_size
+        #read -p "Enter Initial Heap size: " initial_heap_size
+        #read -p "Enter Max Heap size: " max_heap_size
         # read -p "Enter MetaspaceSize: " MetaspaceSize
         # read -p "Enter Max Meta space size: " MaxMetaspaceSize
         # by changing to <any-address> it is accessible by using ip assigned and port number.
@@ -82,7 +82,7 @@ complete_install(){
         # defining path to put datas temporarily in place of N we have to use the line number the configuration is to be used. 
         sed -i '54 i \   \JDK_HEAP_DUMP_PATH=/tmp/jdk_mem_dump/' $INSTALL_DIR$PACKAGE/bin/$WILDFLY_MODE.conf
         # defining size of heap memory initial to max can use G, maxmetaspace should always be half of max_heap_size 
-        sed -i '55 i \   \JAVA_OPTS="-Xms'$initial_heap_size' -Xmx'$max_heap_size' -XX:MetaspaceSize=256M -XX:MaxMetaspaceSize=1G -Djava.net.preferIPv4Stack=true -XX:NativeMemoryTracking=summary -Djboss.remoting.pooled-buffers=false -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=$JDK_HEAP_DUMP_PATH -XX:+UseStringDeduplication"'
+        sed -i '55 i \   \JAVA_OPTS="-Xms2G -Xmx2G -XX:MetaspaceSize=256M -XX:MaxMetaspaceSize=1G -Djava.net.preferIPv4Stack=true -XX:NativeMemoryTracking=summary -Djboss.remoting.pooled-buffers=false -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=$JDK_HEAP_DUMP_PATH -XX:+UseStringDeduplication"' $INSTALL_DIR$PACKAGE/bin/$WILDFLY_MODE.conf
         # Start the WildFly service an enable it to be automatically started at boot time by running:
         # systemctl start $PACKAGE;
         # systemctl enable $PACKAGE;
