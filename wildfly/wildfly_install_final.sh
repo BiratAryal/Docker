@@ -88,9 +88,9 @@ complete_install(){
         # systemctl enable $PACKAGE;
 
         # setup firewall rule for wildfly
-        firewall-cmd --zone=public --permanent --add-port=8080/tcp
-        firewall-cmd --zone=public --permanent --add-port=9990/tcp
-        firewall-cmd --reload
+        #firewall-cmd --zone=public --permanent --add-port=8080/tcp
+        #firewall-cmd --zone=public --permanent --add-port=9990/tcp
+        #firewall-cmd --reload
         # Just display like Name of user, Group, Opened ports, and tarball location.
         echo -e "\n****************************************************************************************************************\n"
         echo -e "\033[30;42mTask Completed\033[0m:\n\033[30;42mUser Created\033[0m: $PACKAGE\n\033[30;42mGroup Created\033[0m: $PACKAGE\n\033[31;40mOpened ports\033[0m 8080 & 9090\n\033[30;42mCreated Service\033[0m\n\033[5;31;40mTarfile present in:\033[0m $DOWNLOAD_DIR"
@@ -98,7 +98,7 @@ complete_install(){
         # Now that WildFly is installed and running the next step is to create a user who will be able to connect using the 
         # administration console or remotely using the CLI.
         # this add-user.sh script is present by default inside /opt/wildfly/bin/ , we are just running that script again.
-        bash  $INSTALL_DIR$PACKAGE/bin/add-user.sh
+        #bash  $INSTALL_DIR$PACKAGE/bin/add-user.sh
 }
 
 tar_not_present(){ 
