@@ -12,8 +12,8 @@ networks: #create custom network as per requirement
                      config:
                      - subnet: 172.168.10.0/24
                        gateway: 172.168.10.1
-       monitoring:
-              driver: bridge
+       # monitoring:
+       #        driver: bridge
 
 # *******************************************************************************************************
 #                                  Volume defination
@@ -53,7 +53,7 @@ services: #define services or container that you want to build.
               # image: turboscript/nginx:04 #docker file present in this directory and builds from there.
               container_name: nginx #defines name of container
               volumes: #using bind-mount all files in directroy nginx is mounted to html
-                     - /home/turboscript/Containers/Primary/Nginx/html:/etc/nginx/html:rw
+                     - /home/turboscript/hgfs/Primary/Nginx/html:/etc/nginx/html:rw
                      - nginx_home:/etc/nginx/:rw
                      # - /home/turboscript/shared/Docker/vid-tuts/nginx:/etc/nginx/html
               ports:
@@ -62,11 +62,11 @@ services: #define services or container that you want to build.
                      test:
                         ipv4_address: 172.168.10.2
        nginx2:
-              build: /home/turboscript/Containers/Primary/Nginx
+              build: /home/turboscript/hgfs/Primary/Nginx
               # image: turboscript/nginx:04 #docker file present in this directory and builds from there.
               container_name: nginx2 #defines name of container
               volumes: #using bind-mount all files in directroy nginx is mounted to html
-                     - /home/turboscript/Containers/Primary/Nginx/html:/etc/nginx/html:rw
+                     - /home/turboscript/hgfs/Primary/Nginx/html:/etc/nginx/html:rw
                      - nginx_home:/etc/nginx/:rw
                      # - /home/turboscript/shared/Docker/vid-tuts/nginx:/etc/nginx/html
               ports:
@@ -95,7 +95,7 @@ services: #define services or container that you want to build.
 #                                  Jenkins Section
 # =======================================================================================================
        jenkins:
-              build: /home/turboscript/Containers/Primary/Jenkins
+              build: /home/turboscript/hgfs/Primary/Jenkins
               privileged: true
               user: root
               container_name: jenkins
