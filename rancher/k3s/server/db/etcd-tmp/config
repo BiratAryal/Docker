@@ -1,0 +1,25 @@
+advertise-client-urls: http://127.0.0.1:2399
+client-transport-security:
+  cert-file: ""
+  client-cert-auth: false
+  key-file: ""
+  trusted-ca-file: ""
+data-dir: /var/lib/rancher/k3s/server/db/etcd-tmp
+election-timeout: 5000
+experimental-initial-corrupt-check: true
+force-new-cluster: true
+heartbeat-interval: 500
+initial-advertise-peer-urls: http://127.0.0.1:2400
+listen-client-urls: http://127.0.0.1:2399
+listen-peer-urls: http://127.0.0.1:2400
+log-outputs:
+- stderr
+logger: zap
+max-snapshots: 0
+max-wals: 0
+name: aa65d5fed090-fefb7166
+peer-transport-security:
+  cert-file: ""
+  client-cert-auth: false
+  key-file: ""
+  trusted-ca-file: ""

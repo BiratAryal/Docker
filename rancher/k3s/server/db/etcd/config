@@ -1,0 +1,26 @@
+advertise-client-urls: https://172.19.0.2:2379
+client-transport-security:
+  cert-file: /var/lib/rancher/k3s/server/tls/etcd/server-client.crt
+  client-cert-auth: true
+  key-file: /var/lib/rancher/k3s/server/tls/etcd/server-client.key
+  trusted-ca-file: /var/lib/rancher/k3s/server/tls/etcd/server-ca.crt
+data-dir: /var/lib/rancher/k3s/server/db/etcd
+election-timeout: 5000
+experimental-initial-corrupt-check: true
+force-new-cluster: true
+heartbeat-interval: 500
+initial-advertise-peer-urls: https://172.19.0.2:2380
+initial-cluster: aa65d5fed090-fefb7166=https://172.19.0.2:2380
+initial-cluster-state: new
+listen-client-urls: https://172.19.0.2:2379,https://127.0.0.1:2379
+listen-metrics-urls: http://127.0.0.1:2381
+listen-peer-urls: https://172.19.0.2:2380
+log-outputs:
+- stderr
+logger: zap
+name: aa65d5fed090-fefb7166
+peer-transport-security:
+  cert-file: /var/lib/rancher/k3s/server/tls/etcd/peer-server-client.crt
+  client-cert-auth: true
+  key-file: /var/lib/rancher/k3s/server/tls/etcd/peer-server-client.key
+  trusted-ca-file: /var/lib/rancher/k3s/server/tls/etcd/peer-ca.crt
