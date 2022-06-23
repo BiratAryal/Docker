@@ -32,7 +32,7 @@ USER_NAME=`cut -d: -f1 /etc/passwd|grep $PACKAGE|xargs`
 # --------------------------------------------------------------------------------------------------------
 # *********************** function declaration start *****************************************************
 
-complete_install(){
+complete_install () {
         # If tarball file is present or download is complete, unpack the tar.gz file and move it to the /opt directory:
         tar xf $DOWNLOAD_DIR/$PACKAGE-$WILDFLY_VERSION.tar.gz -C $INSTALL_DIR;
         # Next, create a symbolic link wildfly that will point to the WildFly installation directory:
@@ -67,11 +67,12 @@ complete_install(){
         cp $INSTALL_DIR$PACKAGE/docs/contrib/scripts/systemd/$PACKAGE.service /etc/systemd/system/;
 
         # Notify systemd that we created a new unit file:
-        # systemctl daemon-reload;
+        systemctl daemon-reload;
         
         #Changing mode to access administrative console
-        #read -p "Enter Initial Heap size: " initial_heap_size
-        #read -p "Enter Max Heap size: " max_heap_size
+        # echo -e "Enter Numerical values in GB \n"
+        # read -p "Enter Initial Heap size: " initial_heap_size
+        # read -p "Enter Max Heap size: " max_heap_size
         # read -p "Enter MetaspaceSize: " MetaspaceSize
         # read -p "Enter Max Meta space size: " MaxMetaspaceSize
         # by changing to <any-address> it is accessible by using ip assigned and port number.
@@ -82,15 +83,21 @@ complete_install(){
         # defining path to put datas temporarily in place of N we have to use the line number the configuration is to be used. 
         sed -i '54 i \   \JDK_HEAP_DUMP_PATH=/tmp/jdk_mem_dump/' $INSTALL_DIR$PACKAGE/bin/$WILDFLY_MODE.conf
         # defining size of heap memory initial to max can use G, maxmetaspace should always be half of max_heap_size 
-        sed -i '55 i \   \JAVA_OPTS="-Xms2G -Xmx2G -XX:MetaspaceSize=256M -XX:MaxMetaspaceSize=1G -Djava.net.preferIPv4Stack=true -XX:NativeMemoryTracking=summary -Djboss.remoting.pooled-buffers=false -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=$JDK_HEAP_DUMP_PATH -XX:+UseStringDeduplication"' $INSTALL_DIR$PACKAGE/bin/$WILDFLY_MODE.conf
+        sed -i '55 i \   \JAVA_OPTS="-Xms64M -Xmx256M -XX:MetaspaceSize=256M -XX:MaxMetaspaceSize=1G -Djava.net.preferIPv4Stack=true -XX:NativeMemoryTracking=summary -Djboss.remoting.pooled-buffers=false -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=$JDK_HEAP_DUMP_PATH -XX:+UseStringDeduplication"' $INSTALL_DIR$PACKAGE/bin/$WILDFLY_MODE.conf
+        # Creating directory for storing log file
+        mkdir $INSTALL_DIR$PACKAGE/$WILDFLY_MODE/log
+        #creating server log file for logging
+        touch $INSTALL_DIR$PACKAGE/$WILDFLY_MODE/log/server.log
+        #changing ownership to wildfly:wildfly as wildfly user will write in this file
+        chmod -R $PACKAGE:$PACKAGE $INSTALL_DIR$PACKAGE/$WILDFLY_MODE/log
         # Start the WildFly service an enable it to be automatically started at boot time by running:
-        # systemctl start $PACKAGE;
-        # systemctl enable $PACKAGE;
+        systemctl start $PACKAGE;
+        systemctl enable $PACKAGE;
 
         # setup firewall rule for wildfly
-        #firewall-cmd --zone=public --permanent --add-port=8080/tcp
-        #firewall-cmd --zone=public --permanent --add-port=9990/tcp
-        #firewall-cmd --reload
+        firewall-cmd --zone=public --permanent --add-port=8080/tcp
+        firewall-cmd --zone=public --permanent --add-port=9990/tcp
+        firewall-cmd --reload
         # Just display like Name of user, Group, Opened ports, and tarball location.
         echo -e "\n****************************************************************************************************************\n"
         echo -e "\033[30;42mTask Completed\033[0m:\n\033[30;42mUser Created\033[0m: $PACKAGE\n\033[30;42mGroup Created\033[0m: $PACKAGE\n\033[31;40mOpened ports\033[0m 8080 & 9090\n\033[30;42mCreated Service\033[0m\n\033[5;31;40mTarfile present in:\033[0m $DOWNLOAD_DIR"
@@ -98,10 +105,10 @@ complete_install(){
         # Now that WildFly is installed and running the next step is to create a user who will be able to connect using the 
         # administration console or remotely using the CLI.
         # this add-user.sh script is present by default inside /opt/wildfly/bin/ , we are just running that script again.
-        #bash  $INSTALL_DIR$PACKAGE/bin/add-user.sh
+        bash  $INSTALL_DIR$PACKAGE/bin/add-user.sh
 }
 
-tar_not_present(){ 
+tar_not_present () { 
         # ONLINE_MD5 and LOCAL_MD5 is declared only on this scope as it is not called globally. 
         # created MD5 to check download integrity one of online file and then another of file present in our local machine.
         ONLINE_MD5=`md5sum <(wget https://download.jboss.org/$PACKAGE/$WILDFLY_VERSION/wildfly-$WILDFLY_VERSION.tar.gz -O- 2>/dev/null)|awk '{print $1}'|xargs`
@@ -122,10 +129,20 @@ tar_not_present(){
         done
 }
 
-group_check(){
-                groupadd -r $PACKAGE
-                useradd -r -g $PACKAGE -d $INSTALL_DIR$PACKAGE -s /sbin/nologin $PACKAGE
-}
+# group_check(){
+#         if [ "$GROUPNAME" == "$PACKAGE" ]; then
+#                 echo -e "Group exists proceeding with this group $PACKAGE \n"
+#         else
+#                 groupadd -r $PACKAGE
+#                 if [ "$USER_NAME" == "$PACKAGE" ]; then
+#                         echo -e "*********User exists proceeding with this user $PACKAGE********* \n"
+#                 else 
+#                 # created user with username wildfly -g is used to define group name and -d is used to define 
+#                 # the home directory -s to give shell to the user.
+#                         useradd -r -g $PACKAGE -d $INSTALL_DIR$PACKAGE -s /sbin/nologin $PACKAGE
+#                 fi
+#         fi
+# }
 # ******************************* function declaration end *******************************************************
 # ----------------------------------------------------------------------------------------------------------------
 # ----------------------------------------------------------------------------------------------------------------
@@ -143,7 +160,8 @@ then
         # WildFly 9 requires Java SE 8 or later. Install the OpenJDK package.
         yum install java-1.8.0-openjdk-devel wget -y;
         # calling group and user check function
-        group_check
+        groupadd -r $PACKAGE
+        useradd -r -g $PACKAGE -d $INSTALL_DIR$PACKAGE -s /sbin/nologin $PACKAGE
         if [ -f "$DOWNLOAD_DIR/$PACKAGE-$WILDFLY_VERSION.tar.gz" ];then
             echo -e "\033[4;30;42m$PACKAGE-$WILDFLY_VERSION.tar.gz\033[0m \033[30;42mexists\033[0m proceeding with this tarball file\033[0m"
             complete_install
